@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import br.com.api.inventario.itens.dto.AtributoDTO;
@@ -29,6 +31,23 @@ public class AtributoService {
 		Optional<Atributo> atributoOptional = atributoRepository.findById(id);
 		Atributo atributo = atributoOptional.orElseThrow(() -> new ResourceNotFoundException("Atributo não encontrado!"));
 		return new AtributoDTO(atributo);
+	}
+
+	public Page<AtributoDTO> findAllPaged(PageRequest pageRequest) {
+		Page<Atributo> atributoPage = atributoRepository.findAll(pageRequest);
+		return atributoPage.map(x -> new AtributoDTO(x));
+	}
+
+	public AtributoDTO insert(AtributoDTO atributoDTO) {
+		Atributo atributo = new Atributo();
+		copiaDtoParaEntidade(atributoDTO, atributo);
+		Atributo inserido = atributoRepository.save(atributo);
+		return new AtributoDTO(inserido);
+	}
+
+	private void copiaDtoParaEntidade(AtributoDTO atributoDTO, Atributo atributo) {
+		atributo.setBeneficio(atributoDTO.getBeneficio());
+		atributo.setDescricao(atributoDTO.getDescricao());
 	}
 
 }
