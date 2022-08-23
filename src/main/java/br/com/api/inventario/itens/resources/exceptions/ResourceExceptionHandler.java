@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import br.com.api.inventario.itens.services.exceptions.DatabaseException;
 import br.com.api.inventario.itens.services.exceptions.ResourceNotFoundException;
 
 @ControllerAdvice
@@ -20,6 +21,19 @@ public class ResourceExceptionHandler {
 			HttpServletRequest request) {
 		StandardError err = new StandardError();
 		err.setError("Recurso não encontrado!");
+		err.setMessage(e.getMessage());
+		err.setPath(request.getRequestURI());
+		err.setStatus(HttpStatus.NOT_FOUND.value());
+		err.setTimestamp(Instant.now());
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(err);
+	}
+	
+	@ExceptionHandler(DatabaseException.class)
+	public ResponseEntity<StandardError> databaseIntegrityError(
+			DatabaseException e,
+			HttpServletRequest request) {
+		StandardError err = new StandardError();
+		err.setError("Erro de integridade. Tentativa de deletar entidade vinculada a outra!");
 		err.setMessage(e.getMessage());
 		err.setPath(request.getRequestURI());
 		err.setStatus(HttpStatus.NOT_FOUND.value());
